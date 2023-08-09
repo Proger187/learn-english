@@ -1,4 +1,4 @@
-const mongoose = require("../Db")
+const mongoose = require("../DB")
 const Schema = mongoose.Schema
 
 
