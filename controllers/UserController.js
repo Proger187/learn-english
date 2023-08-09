@@ -2,9 +2,11 @@ const {User} = require("../models/Models")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 
-const generateJTW = (id, email, role) => {
+const generateJTW = (user) => {
+    const {id, login, role} = user
+    const {name, last_name} = user.full_name
     return jwt.sign(
-        {id, email, role}, 
+        {id, login, role, name, last_name}, 
         process.env.SECRET_KEY,
         {expiresIn:'24h'}
     )
@@ -13,7 +15,6 @@ const generateJTW = (id, email, role) => {
 class UserController{
     async registration(req, res){
         try{
-            console.log(req.body);
             const {login, role, password, full_name} = req.body
             if(!login || !password){
                 return res.json({message:"Введите логин и пароль"})
@@ -32,7 +33,7 @@ class UserController{
             }
             const user = new User({login:login,role:userRole, password: hashPassword, full_name: full_name})
             await user.save()
-            const token = generateJTW(user.id, user.login, user.role)
+            const token = generateJTW(user)
             return res.json({token})
         }
         catch(e){
@@ -49,11 +50,11 @@ class UserController{
         if (!comparePassword) {
             return res.json({message:"Неверный пароль"})
         }
-        const token = generateJTW(user.id, user.login, user.role)
+        const token = generateJTW(user)
         return res.json({token})
     }
     async check(req, res, next){
-        const token = generateJTW(req.user.id, req.user.login, req.user.role)
+        const token = generateJTW(req.user)
         return res.json({token})
     }
 }
