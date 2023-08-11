@@ -18,7 +18,4 @@ const Word = sequelize.define('word', {
     kyrgyz: {type:DataTypes.STRING}
 })
 
-module.exports = {
-    User,
-    Word
-}
+module.exports = {Word, User}
