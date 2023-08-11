@@ -1,10 +1,10 @@
 const Router = require('express');
-const router = new Router()
+const wordRouter = new Router()
 const wordController = require('../controllers/WordController');
-const checkRole = require('../middleware/checkRoleMiddleware');
+const checkRole = require('../middleware/checkRole');
 
-router.post('/', checkRole("ADMIN"), wordController.create)
-router.get('/', wordController.getAll)
-router.get('/:id', wordController.getById)
+wordRouter.post('/', checkRole("ADMIN"), wordController.create)
+wordRouter.get('/', wordController.getAll)
+wordRouter.get('/:id', wordController.getById)
 
 module.exports = {wordRouter}

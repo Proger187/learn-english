@@ -3,8 +3,7 @@ const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 
 const generateJTW = (user) => {
-    const {id, login, role} = user
-    const {name, last_name} = user.full_name
+    const {id, login, role, name, last_name} = user
     return jwt.sign(
         {id, login, role, name, last_name}, 
         process.env.SECRET_KEY,
@@ -27,7 +26,7 @@ class UserController{
             if(!name || !last_name){
                 return res.status(404).json({message:"Нужно полное имя пользователя"})
             }
-            const user = await User.create({login:login,role:userRole, password: hashPassword, full_name: full_name})
+            const user = await User.create({login:login,role:role, password: hashPassword, name:name, last_name:last_name})
             const token = generateJTW(user)
             return res.status(200).json({token})
         }
