@@ -11,7 +11,7 @@ const User = sequelize.define('user', {
     lastname:{type:DataTypes.STRING}
 })
 
-const Word = new Schema({
+const Word = sequelize.define('word', {
     id:{type:DataTypes.INTEGER, primaryKey:true, autoIncrement:true},
     english: {type:DataTypes.STRING},
     russian: {type:DataTypes.STRING},
