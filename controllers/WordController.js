@@ -1,9 +1,14 @@
-const {Word} = require("../models/Models")
+const {Word, User} = require("../models/Models")
 
 class WordController{
     async getAll(req, res){
-        let {page, count} = req.params;
-        
+        let {page, count} = req.query;
+        let data = await Word.findAndCountAll({
+            where:{},
+            offset: page,
+            limit: count
+        })
+        return res.status(200).json({data})
     }
     async getById(req, res) {
         let {id} = req.params
@@ -23,16 +28,32 @@ class WordController{
             return res.status(500).json({message: error.message})
         }
     }
-    // async update(req, res){
-        
-    // }
-    // async delete(req, res){
-    //     const {id} = req.params;
-    //     // удаляем по id 
-    //     const word = await Word.findByIdAndDelete(id);
-    //     if(word) return res.status(200).json({word});
-    //     return res.status(500).json({message:"Непредвиденная ошибка"});
-    // }
+    async update(req, res){
+        try{
+            let {id} = req.params;
+            const {english, russian, kyrgyz} = req.body;
+            const item = await Word.findOne({
+                where:{id}})
+            await item.set({
+                english,
+                russian,
+                kyrgyz
+            })
+            return res.status(200).json({item})
+        }
+        catch(error){
+            return res.status(500).json({message: error.message})
+        }
+    }
+    async delete(req, res){
+        let {id} = req.params;
+        // удаляем по id 
+        const word = await Word.findOne({
+            where:{id}})
+        await word.destroy();
+        if(word) return res.status(200).json({message:"Успешно удалено", item_id:id});
+        return res.status(500).json({message:"Непредвиденная ошибка"});
+    }
 }
 
 module.exports = new WordController()

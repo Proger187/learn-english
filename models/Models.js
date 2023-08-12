@@ -18,4 +18,22 @@ const Word = sequelize.define('word', {
     kyrgyz: {type:DataTypes.STRING}
 })
 
-module.exports = {Word, User}
+const Dictionary = sequelize.define("dictionary", {
+    id:{type:DataTypes.INTEGER, primaryKey:true, autoIncrement:true},
+    name: {type:DataTypes.STRING, defaultValue:"Избранное"}
+})
+
+const DictionaryWord = sequelize.define("dictionary-word", {
+    id:{type:DataTypes.INTEGER, primaryKey:true, autoIncrement:true}
+})
+
+User.hasMany(Dictionary)
+Dictionary.belongsTo(User)
+
+Dictionary.hasMany(DictionaryWord, {as:"words"})
+DictionaryWord.belongsTo(Dictionary)
+
+Word.hasMany(DictionaryWord)
+DictionaryWord.belongsTo(Word)
+
+module.exports = {Word, User, Dictionary, DictionaryWord}
