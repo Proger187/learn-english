@@ -3,8 +3,28 @@ const {Dictionary, DictionaryWord, Word} = require("../models/Models")
 class DictController{
     async getById(req, res) {
         let {id} = req.params
-        let data = await Dictionary.findOne({
-            where:{id},
+        const data = await Dictionary.findOne({
+            where: { id },
+            include: [
+                {
+                    model: DictionaryWord,
+                    as: "words",
+                    include: [
+                        {
+                            model: Word, // Assuming Word is the model name for the associated Word
+                            as: "word"   // You can use any alias you prefer
+                        }
+                    ]
+                }
+            ]
+        });
+             
+        return res.status(200).json({data})
+    }
+    async getByUserId(req, res){
+        let userId = req.user.id;
+        let data = await Dictionary.findAndCountAll({
+            where:{userId},
             include:[{model: DictionaryWord, as:"words"}]
         })
         return res.status(200).json({data})
@@ -42,6 +62,13 @@ class DictController{
             if (!word) {
                 return res.status(404).json({message:'Слово не найдено.'});
             }
+            const condidate =await DictionaryWord.findOne({where:{
+                dictionaryId: dictionary.id,
+                wordId:wordId
+            }})
+            if(condidate){
+                return res.status(403).json({message:"Уже добавлено"})
+            }
             const item = await DictionaryWord.create({ dictionaryId: dictionary.id, wordId: word.id });
 
             return res.status(200).json({item})
@@ -52,9 +79,8 @@ class DictController{
     }
     async removeWord(req, res){
         try {
-            const {id} = req.params;
-            
-            const word = await DictionaryWord.findOne({where:{id}})
+            const {wordId} = req.body
+            const word = await DictionaryWord.findOne({where:{id:wordId}})
             // Удаляем связанные DictionaryWord
         
             // Удаляем сам словарь
@@ -62,6 +88,7 @@ class DictController{
         
             return res.status(200).json({message:"Успешно удалено", deleted_id: word.id})
           } catch (error) {
+            console.log(error);
             return res.status(500).json({message: error.message})
           }
     }
