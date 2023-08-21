@@ -3,29 +3,39 @@ const {Word, User} = require("../models/Models")
 class WordController{
     async getAll(req, res){
         let {page, count} = req.query;
-        let data = await Word.findAndCountAll({
-            where:{},
-            offset: page,
-            limit: count
-        })
-        return res.status(200).json({data})
+        try {
+            let data = await Word.findAndCountAll({
+                where:{},
+                offset: page,
+                limit: count
+            })
+            return res.json({data, successful: true})
+        } catch (error) {
+            res.json({message:e.message, successful: false})
+        }
+
     }
     async getById(req, res) {
-        let {id} = req.params
-        let data = await Word.findOne({
-            where:{id}})
-        return res.status(200).json({data})
+        try {
+            let {id} = req.params
+            let data = await Word.findOne({
+                where:{id}})
+            return res.json({data, successful: true})
+        } catch (error) {
+            res.json({message:e.message, successful: false})
+        }
+
     }
     async create(req, res){
         try {
             const {english, russian, kyrgyz} = req.body;
             if(!english || !russian || !kyrgyz){
-                return res.status(404).json({message:"Не все значения были введены"})
+                return res.json({message:"Не все значения были введены"})
             }
             const word = await Word.create({english, russian, kyrgyz})
-            return res.status(200).json({word})
+            return res.json({word, successful: true})
         } catch (error) {
-            return res.status(500).json({message: error.message})
+            return res.json({message: error.message, successful: false})
         }
     }
     async update(req, res){
@@ -39,10 +49,10 @@ class WordController{
                 russian,
                 kyrgyz
             })
-            return res.status(200).json({item})
+            return res.json({item, successful: true})
         }
         catch(error){
-            return res.status(500).json({message: error.message})
+            return res.json({message: error.message, successful: false})
         }
     }
     async delete(req, res){
@@ -51,8 +61,8 @@ class WordController{
         const word = await Word.findOne({
             where:{id}})
         await word.destroy();
-        if(word) return res.status(200).json({message:"Успешно удалено", item_id:id});
-        return res.status(500).json({message:"Непредвиденная ошибка"});
+        if(word) return res.json({message:"Успешно удалено", item_id:id, successful: true});
+        return res.json({message:"Непредвиденная ошибка", successful: false});
     }
 }
 

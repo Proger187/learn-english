@@ -16,22 +16,22 @@ class UserController{
         try{
             const {login, role, password, name, last_name} = req.body
             if(!login || !password){
-                return res.status(404).json({message:"Введите логин и пароль"})
+                return res.json({message:"Введите логин и пароль", successful: false})
             }
             const condidate = await User.findOne({where:{login}})
             if (condidate) {
-                return res.status(404).json({message:"Пользователь с таким именем уже существует"})
+                return res.json({message:"Пользователь с таким именем уже существует", successful: false})
             }
             const hashPassword = await bcrypt.hash(password, 5)
             if(!name || !last_name){
-                return res.status(404).json({message:"Нужно полное имя пользователя"})
+                return res.json({message:"Нужно полное имя пользователя", successful: false})
             }
             const user = await User.create({login:login,role:role, password: hashPassword, name:name, last_name:last_name})
             const token = generateJTW(user)
-            return res.status(200).json({token})
+            return res.json({token, successful: true})
         }
         catch(e){
-            res.status(500).json({message:e.message})
+            res.json({message:e.message, successful: false})
         }
     }
     async login(req, res){
@@ -39,26 +39,26 @@ class UserController{
             const {login, password} = req.body
             const user = await User.findOne({where:{login}})
             if (!user) {
-                return res.status(404).json({message:"Такого пользователя не существует"})
+                return res.json({message:"Такого пользователя не существует", successful: false})
             }
             let comparePassword = bcrypt.compareSync(password, user.password)
             if (!comparePassword) {
-                return res.status(404).json({message:"Неверный пароль"})
+                return res.json({message:"Неверный пароль", successful: false})
             }
             const token = generateJTW(user)
-            return res.status(200).json({token})
+            return res.json({token, successful: true})
         }
         catch(e){
-            res.status(500).json({message:e.message})
+            res.json({message:e.message, successful: false})
         }
     }
     async check(req, res, next){
         try{
             const token = generateJTW(req.user)
-            return res.status(200).json({token})
+            return res.json({token, successful: true})
         }
         catch(e){
-            res.status(500).json({message:e.message})
+            res.json({message:e.message, successful: false})
         }
     }
 }
